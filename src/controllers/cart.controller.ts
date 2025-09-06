@@ -12,7 +12,7 @@ export const getCart = async (req: Request, res: Response) => {
         );
     } catch (err: any) {
         logger.error("Not found", { message: err.message });
-        res.status(400).json(errorResponse(400, err.message));
+        res.status(400).json({ error: err.message });
     }
 };
 
@@ -28,7 +28,7 @@ export const addToCart = async (req: Request, res: Response) => {
         );
     } catch (err: any) {
         logger.error("Not found", { message: err.message });
-        res.status(400).json(errorResponse(400, err.message));
+        res.status(400).json({ error: err.message });
     }
 };
 
@@ -38,15 +38,9 @@ export const removeProductFromCart = async (req: Request, res: Response) => {
             req.params.productId,
             req.user.id
         );
-        res.status(200).json(
-            successResponse(
-                200,
-                "Product removed from cart successfully.",
-                result
-            )
-        );
+        res.status(200).json(result);
     } catch (err: any) {
         logger.error("Not found", { message: err.message });
-        res.status(400).json(errorResponse(400, err.message));
+        res.status(400).json({ error: err.message });
     }
 };

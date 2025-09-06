@@ -8,8 +8,7 @@ import {
 const router = Router();
 
 router.get("/", SystemPreferenceController.getAll);
-router.get("/:groupId", SystemPreferenceController.getByGroupId);
-router.get("/:groupId/:key", SystemPreferenceController.getByKey);
+router.get("/:key", SystemPreferenceController.getByKey);
 router.post(
     "/",
     authenticateUser,

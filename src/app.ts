@@ -9,19 +9,24 @@ import subCategoryRoutes from "./routes/subcategory.routes";
 import addressRoutes from "./routes/address.routes";
 import systemPreferenceRoutes from "./routes/systempreference.routes";
 import cartRoutes from "./routes/cart.routes";
+import orderRoutes from "./routes/order.routes";
 
 import { errorHandler } from "./middlewares/errorHandler";
+import { env } from "./config/env";
+import { requestResponseLogger } from "./middlewares/requestResponseLogger.middleware";
 
 const app = express();
 
 app.use(
     cors({
-        origin: process.env.FRONTEND_URLS?.split(","),
+        origin: env.FRONTEND_URLS.split(","),
+        credentials: true,
     })
 );
 
 app.use(express.json());
 app.use(errorHandler);
+app.use(requestResponseLogger);
 // app.use(passport.initialize());
 // app.use(passport.session());
 
@@ -33,5 +38,8 @@ app.use("/api/subcategories", subCategoryRoutes);
 app.use("/api/addresses", addressRoutes);
 app.use("/api/system-preferences", systemPreferenceRoutes);
 app.use("/api/cart", cartRoutes);
+app.use("/api/order", orderRoutes);
+
+app.use(errorHandler);
 
 export default app;

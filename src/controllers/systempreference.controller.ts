@@ -1,80 +1,30 @@
 import { Request, Response } from "express";
-import { errorResponse, successResponse } from "../utils/ApiResponse";
-import { logger } from "../utils/logger";
-
 import * as SystemPreferenceService from "../services/systempreference.service";
+import { handle } from "../middlewares/requestHandler";
 
-export const getAll = async (req: Request, res: Response) => {
-    try {
-        const result = await SystemPreferenceService.getAll();
-        res.status(200).json(
-            successResponse(
-                200,
-                "System Preference fetched successfully.",
-                result
-            )
-        );
-    } catch (err: any) {
-        logger.error("Not found", { message: err.message });
-        res.status(400).json(errorResponse(400, err.message));
-    }
+const transformPreferences = (prefs: { key: string; value: string }[]) => {
+    return prefs.reduce((acc, curr) => {
+        acc[curr.key] = curr.value;
+        return acc;
+    }, {} as Record<string, string>);
 };
 
-export const getByGroupId = async (req: Request, res: Response) => {
-    try {
-        const result = await SystemPreferenceService.getByGroupId(
-            req.params.groupId
-        );
-        res.status(200).json(
-            successResponse(
-                200,
-                "System Preference fetched successfully.",
-                result
-            )
-        );
-    } catch (err: any) {
-        logger.error("Not found", { message: err.message });
-        res.status(400).json(errorResponse(400, err.message));
-    }
-};
+export const getAll = handle(async (req: Request, res: Response) => {
+    const result = await SystemPreferenceService.getAll();
+    res.status(200).json(transformPreferences(result));
+});
 
-export const getByKey = async (req: Request, res: Response) => {
-    try {
-        const result = await SystemPreferenceService.getByKey(
-            req.params.groupId,
-            req.params.key
-        );
-        res.status(200).json(
-            successResponse(
-                200,
-                "System Preference fetched successfully.",
-                result
-            )
-        );
-    } catch (err: any) {
-        logger.error("Not found", { message: err.message });
-        res.status(400).json(errorResponse(400, err.message));
-    }
-};
+export const getByKey = handle(async (req: Request, res: Response) => {
+    const result = await SystemPreferenceService.getByKey(req.params.key);
+    if (!result) return res.status(404).json({ error: "Not Found." });
+    res.status(200).json(result.value);
+});
 
-export const set = async (req: Request, res: Response) => {
-    try {
-        const { groupId, key, value } = req.body;
-        if (!groupId || !key) {
-            return res
-                .status(400)
-                .json(errorResponse(400, "GroupId and Key are required"));
-        }
-        const result = await SystemPreferenceService.set(groupId, key, value);
-        res.status(200).json(
-            successResponse(
-                200,
-                "System Preference fetched successfully.",
-                result
-            )
-        );
-    } catch (err: any) {
-        logger.error("Get System Preference error", { message: err.message });
-        res.status(400).json(errorResponse(400, err.message));
+export const set = handle(async (req: Request, res: Response) => {
+    const { key, value } = req.body;
+    if (!key) {
+        return res.status(400).json({ error: "Key is required." });
     }
-};
+    const result = await SystemPreferenceService.set(key, value);
+    res.status(204).json({ [result.key]: result.value });
+});
