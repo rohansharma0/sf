@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
+import { verifyToken } from "../utils/jwt";
 
 declare global {
     namespace Express {
@@ -23,7 +23,7 @@ export const authenticateUser = (
     const token = authHeader.split(" ")[1];
 
     try {
-        const decoded = jwt.verify(token, process.env.TOKEN_SECRET!) as {
+        const decoded = verifyToken(token) as {
             id: string;
             role: string;
             email: string;

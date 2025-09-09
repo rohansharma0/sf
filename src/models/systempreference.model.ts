@@ -1,21 +1,23 @@
 import { Schema, Document, model } from "mongoose";
 
 export interface ISystemPreference extends Document {
-    groupId: string;
     key: string;
     value: string;
+    isPublic: boolean;
+    groupId?: string;
+    loadOnBoot?: boolean;
 }
 
 const SystemPreferenceSchema = new Schema<ISystemPreference>(
     {
-        groupId: { type: String, required: true, index: true },
-        key: { type: String, required: true },
+        key: { type: String, required: true, unique: true },
         value: { type: String, required: true },
+        isPublic: { type: Boolean, default: true },
+        groupId: { type: String },
+        loadOnBoot: { type: Boolean, default: false },
     },
     { timestamps: true }
 );
-
-SystemPreferenceSchema.index({ groupId: 1, key: 1 }, { unique: true });
 
 export default model<ISystemPreference>(
     "SystemPreference",
