@@ -1,18 +1,14 @@
 import { Request, Response, NextFunction } from "express";
-import { logger } from "../utils/logger";
-
-declare module "winston" {
-    interface Logger {
-        json: (message: any) => Logger;
-    }
-}
+import { jsonLogger, logger } from "../utils/logger";
 
 const logRequest = (req: Request) => {
-    logger.info(
-        `${req.method} ${req.originalUrl} - REQUEST: ${JSON.stringify(
-            req.body
-        )}`
-    );
+    const safeBody = { ...req.body };
+    // if (safeBody.password) safeBody.password = "******";
+    // if (safeBody.oldPassword) safeBody.oldPassword = "******";
+    // if (safeBody.newPassword) safeBody.newPassword = "******";
+    const requestBody =
+        req.method !== "GET" ? `- REQUEST: ${JSON.stringify(safeBody)}` : "";
+    logger.info(`${req.method} ${req.originalUrl} ${requestBody}`);
 };
 
 const logResponse = (
@@ -37,7 +33,8 @@ const logJsonRequestResponse = (
     responseBody: any,
     duration: number
 ) => {
-    logger.json({
+    jsonLogger.log({
+        level: "json",
         request: {
             method: req.method,
             url: req.originalUrl,
@@ -72,10 +69,11 @@ export const requestResponseLogger = (
     };
 
     res.send = (body: any) => {
-        try {
-            responseBody = typeof body === "string" ? JSON.parse(body) : body;
-        } catch {
-            responseBody = body;
+        responseBody = body;
+        if (typeof body === "string") {
+            try {
+                responseBody = JSON.parse(body);
+            } catch {}
         }
         return originalSend(body);
     };

@@ -11,7 +11,7 @@ import systemPreferenceRoutes from "./routes/systempreference.routes";
 import cartRoutes from "./routes/cart.routes";
 import orderRoutes from "./routes/order.routes";
 
-import { errorHandler } from "./middlewares/errorHandler";
+import { errorHandler, notFoundHandler } from "./middlewares/error.minddleware";
 import { env } from "./config/env";
 import { requestResponseLogger } from "./middlewares/requestResponseLogger.middleware";
 
@@ -36,10 +36,11 @@ app.use("/api/categories", categoryRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/subcategories", subCategoryRoutes);
 app.use("/api/addresses", addressRoutes);
-app.use("/api/system-preferences", systemPreferenceRoutes);
+app.use("/api/preferences", systemPreferenceRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/order", orderRoutes);
 
+app.use(notFoundHandler);
 app.use(errorHandler);
 
 export default app;

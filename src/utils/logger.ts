@@ -18,10 +18,11 @@ const logLevels = {
     },
 };
 
+winston.addColors(logLevels.colors);
+
 const logFormat = winston.format.printf(
-    ({ level, message, timestamp, stack }) => {
-        return `${timestamp} [${level}]: ${stack || message}`;
-    }
+    ({ level, message, timestamp, stack }) =>
+        `${timestamp} [${level}]: ${stack || message}`
 );
 
 const debugRotateTransport = new DailyRotateFile({
@@ -61,10 +62,15 @@ const consoleTransport = new winston.transports.Console({
     ),
 });
 
-export const logger = winston.createLogger({
-    levels: logLevels.levels,
+export const logger: winston.Logger & {
+    json: (message: any) => winston.Logger;
+} = winston.createLogger({
     level: "debug",
-    transports: [consoleTransport, debugRotateTransport, jsonRotateTransport],
-});
+    transports: [consoleTransport, debugRotateTransport],
+}) as any;
 
-winston.addColors(logLevels.colors);
+export const jsonLogger = winston.createLogger({
+    levels: logLevels.levels,
+    level: "json",
+    transports: [jsonRotateTransport],
+}) as any;
