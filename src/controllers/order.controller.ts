@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { paymentService } from "../services/payment.service";
 import Order from "../models/order.model";
 import { handle } from "../middlewares/requestHandler";
 
@@ -21,53 +20,53 @@ export const createOrder = handle(async (req: Request, res: Response) => {
     });
 
     // Create Razorpay order
-    const razorpayOrder = await paymentService.createRazorpayOrder(
-        totalAmount,
-        order._id as string
-    );
+    // const razorpayOrder = await paymentService.createRazorpayOrder(
+    //     totalAmount,
+    //     order._id as string
+    // );
 
     // Save razorpayOrderId to order
-    order.razorpayOrderId = razorpayOrder.id;
+    // order.razorpayOrderId = razorpayOrder.id;
     await order.save();
 
-    res.json({ success: true, order, razorpayOrder });
+    res.json({ success: true, order });
 });
 
-export const verifyPayment = async (req: Request, res: Response) => {
-    try {
-        const {
-            razorpay_order_id,
-            razorpay_payment_id,
-            razorpay_signature,
-            orderId,
-        } = req.body;
+// export const verifyPayment = async (req: Request, res: Response) => {
+//     try {
+//         const {
+//             razorpay_order_id,
+//             razorpay_payment_id,
+//             razorpay_signature,
+//             orderId,
+//         } = req.body;
 
-        const isValid = paymentService.verifySignature(
-            razorpay_order_id,
-            razorpay_payment_id,
-            razorpay_signature
-        );
+//         const isValid = paymentService.verifySignature(
+//             razorpay_order_id,
+//             razorpay_payment_id,
+//             razorpay_signature
+//         );
 
-        if (!isValid) {
-            await Order.findByIdAndUpdate(orderId, { status: "failed" });
-            return res.status(400).json({
-                success: false,
-                message: "Payment verification failed",
-            });
-        }
+//         if (!isValid) {
+//             await Order.findByIdAndUpdate(orderId, { status: "failed" });
+//             return res.status(400).json({
+//                 success: false,
+//                 message: "Payment verification failed",
+//             });
+//         }
 
-        await Order.findByIdAndUpdate(orderId, {
-            status: "paid",
-            razorpayPaymentId: razorpay_payment_id,
-            razorpaySignature: razorpay_signature,
-        });
+//         await Order.findByIdAndUpdate(orderId, {
+//             status: "paid",
+//             razorpayPaymentId: razorpay_payment_id,
+//             razorpaySignature: razorpay_signature,
+//         });
 
-        res.json({ success: true, message: "Payment verified" });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({
-            success: false,
-            message: "Payment verification error",
-        });
-    }
-};
+//         res.json({ success: true, message: "Payment verified" });
+//     } catch (err) {
+//         console.error(err);
+//         res.status(500).json({
+//             success: false,
+//             message: "Payment verification error",
+//         });
+//     }
+// };
