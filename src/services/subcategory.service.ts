@@ -1,5 +1,6 @@
-import SubCategory from "../models/subcategory.model";
-import Category, { ICategory } from "../models/category.model";
+import slugify from "slugify";
+import { ISubCategory, SubCategory } from "../models/subCategory.model";
+import { Category, ICategory } from "../models/category.model";
 
 interface SubCategoryQueryParams {
     page: number;
@@ -9,8 +10,8 @@ interface SubCategoryQueryParams {
 export const createSubCategory = async (
     data: {
         title: string;
-        description: string;
-        isBanner: boolean;
+        description?: string;
+        isBanner?: boolean;
     },
     cId: string,
     image: string | null,
@@ -22,18 +23,23 @@ export const createSubCategory = async (
         throw new Error("Category not found");
     }
 
-    const subCategory = new SubCategory({
+    const subCategory: ISubCategory = new SubCategory({
         title: data.title,
         description: data.description,
-        image: image,
-        isBanner: data.isBanner,
-        imagePublicId: imagePublicId,
+        image,
+        isBanner: data.isBanner ?? false,
+        imagePublicId,
+        slug: slugify(data.title, { lower: true }),
+        parentCategoryId: category._id,
     });
 
     await subCategory.save();
 
-    category.subCategories.push(subCategory._id);
-    await category.save();
+    if (category.subCategories) {
+        category.subCategories.push(subCategory._id as any);
+        await category.save();
+    }
+
     return subCategory;
 };
 
@@ -66,7 +72,10 @@ export const getSubCategoryById = async (id: string) => {
 };
 
 export const updateSubCategoryById = async (id: string, data: any) => {
-    return await SubCategory.findByIdAndUpdate(id, data, { new: true });
+    if (data.title && !data.slug) {
+        data.slug = slugify(data.title, { lower: true });
+    }
+    return SubCategory.findByIdAndUpdate(id, data, { new: true });
 };
 
 export const deleteSubCategoryById = async (id: string) => {

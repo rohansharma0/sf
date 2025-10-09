@@ -1,4 +1,4 @@
-import Address, { IAddress } from "../models/address.model";
+import { Address, IAddress } from "../models/address.model";
 import { Types } from "mongoose";
 
 export const createAddress = async (
@@ -6,7 +6,6 @@ export const createAddress = async (
     data: Partial<IAddress>
 ) => {
     if (data.isPrimary) {
-        // Ensure no other primary address for this user
         await Address.updateMany(
             { user: userId },
             { $set: { isPrimary: false } }
@@ -19,7 +18,7 @@ export const getUserAddresses = async (userId: Types.ObjectId) => {
     return await Address.find({ user: userId });
 };
 
-export const getAddressById = async (
+export const getUserAddressById = async (
     userId: Types.ObjectId,
     addressId: string
 ) => {

@@ -3,8 +3,7 @@ import { Schema, model, Document, Types } from "mongoose";
 export interface IAddress extends Document {
     _id: Types.ObjectId;
     user: Types.ObjectId;
-    firstName: string;
-    lastName: string;
+    name: string;
     country: string;
     state: string;
     address1: string;
@@ -22,14 +21,9 @@ const addressSchema = new Schema<IAddress>(
             ref: "User",
             required: true,
         },
-        firstName: {
+        name: {
             type: String,
             required: true,
-        },
-        lastName: {
-            type: String,
-            required: false,
-            default: "",
         },
         country: {
             type: String,
@@ -71,8 +65,9 @@ addressSchema.methods.toJSON = function () {
     const address = this.toObject();
     delete address.createdAt;
     delete address.updatedAt;
+    delete address.user;
     delete address.__v;
     return address;
 };
 
-export default model<IAddress>("Address", addressSchema);
+export const Address = model<IAddress>("Address", addressSchema);

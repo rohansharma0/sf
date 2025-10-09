@@ -1,56 +1,33 @@
-import { Schema, model, Document, Types } from "mongoose";
+import { Schema, model, Types, Document } from "mongoose";
 
 export interface ISubCategory extends Document {
-    _id: Types.ObjectId;
     title: string;
-    description: string;
+    description?: string;
     image?: string;
     imagePublicId?: string;
     products: Types.ObjectId[];
-    isBanner: boolean;
+    isBanner?: boolean;
+    slug: string;
+    parentCategoryId?: Types.ObjectId;
+    createdAt?: Date;
+    updatedAt?: Date;
 }
-const subCategorySchema = new Schema<ISubCategory>(
+
+const SubCategorySchema = new Schema<ISubCategory>(
     {
-        title: {
-            type: String,
-            required: true,
-        },
-        description: {
-            type: String,
-            required: true,
-        },
-        image: {
-            type: String,
-            default: null,
-        },
-        imagePublicId: {
-            type: String,
-            default: null,
-        },
-        isBanner: {
-            type: Boolean,
-            default: false,
-        },
-        products: [
-            {
-                type: Schema.Types.ObjectId,
-                ref: "Product",
-                default: [],
-                required: false,
-            },
-        ],
+        title: { type: String, required: true, index: true },
+        description: { type: String },
+        image: { type: String },
+        imagePublicId: { type: String },
+        products: [{ type: Types.ObjectId, ref: "Product" }],
+        isBanner: { type: Boolean, default: false },
+        slug: { type: String, required: true, index: true },
+        parentCategoryId: { type: Types.ObjectId, ref: "Category" },
     },
-    {
-        timestamps: true,
-    }
+    { timestamps: true }
 );
 
-subCategorySchema.methods.toJSON = function () {
-    const subCategory = this.toObject();
-    delete subCategory.createdAt;
-    delete subCategory.updatedAt;
-    delete subCategory.__v;
-    return subCategory;
-};
-
-export default model<ISubCategory>("SubCategory", subCategorySchema);
+export const SubCategory = model<ISubCategory>(
+    "SubCategory",
+    SubCategorySchema
+);

@@ -1,15 +1,11 @@
 import { Request, Response } from "express";
-import * as SubCategoryService from "../services/subcategory.service";
-import {
-    createSubCategorySchema,
-    updateSubCategorySchema,
-} from "../schemas/subcategory.schema";
-import cloudinary from "../config/cloudinary";
+import * as SubCategoryService from "../services/subCategory.service";
 import { handle } from "../middlewares/requestHandler";
+import { updateSubCategorySchema } from "../schemas/subCategory.schema";
 
 export const createSubCategory = handle(async (req: Request, res: Response) => {
     const image = req.file?.path || null;
-    const imagePublicId = req.file?.filename || null;
+    const imagePublicId = (req as any).file?.filename || null;
 
     const result = await SubCategoryService.createSubCategory(
         req.body,
@@ -17,6 +13,7 @@ export const createSubCategory = handle(async (req: Request, res: Response) => {
         image,
         imagePublicId
     );
+
     res.status(201).json(result);
 });
 
@@ -50,7 +47,7 @@ export const getSubCategoryById = handle(
 export const updateSubCategory = handle(async (req: Request, res: Response) => {
     const parsed = updateSubCategorySchema.safeParse(req.body);
     if (!parsed.success) {
-        return res.status(400).json({ error: parsed.error.message });
+        return res.status(400).json({ error: parsed.error });
     }
 
     const result = await SubCategoryService.updateSubCategoryById(
@@ -60,7 +57,6 @@ export const updateSubCategory = handle(async (req: Request, res: Response) => {
     if (!result) {
         return res.status(404).json({ error: "SubCategory not found." });
     }
-
     res.status(200).json(result);
 });
 
@@ -72,9 +68,9 @@ export const deleteSubCategory = handle(async (req: Request, res: Response) => {
         return res.status(404).json({ error: "SubCategory not found." });
     }
 
-    if (result.imagePublicId) {
-        await cloudinary.uploader.destroy(result.imagePublicId);
-    }
+    // if (result.imagePublicId) {
+    //     await cloudinary.uploader.destroy(result.imagePublicId);
+    // }
 
     res.status(200).json(result);
 });

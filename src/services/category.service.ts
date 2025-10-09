@@ -1,14 +1,13 @@
-import Category from "../models/category.model";
+import { Category } from "../models/category.model";
 
 export const createCategory = async (data: any) => {
     return await Category.create(data);
 };
-
 export const getAllCategories = async () => {
-    return await Category.find({}, "_id title subCategories")
+    return await Category.find({}, "_id title slug subCategories")
         .populate({
             path: "subCategories",
-            select: "_id title image",
+            select: "_id title slug image",
             options: { lean: true },
         })
         .lean();

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import * as categoryController from "../controllers/category.controller";
+import * as CategoryController from "../controllers/category.controller";
 import {
     authenticateUser,
     authorizeRoles,
@@ -9,33 +9,33 @@ import {
     createCategorySchema,
     updateCategorySchema,
 } from "../schemas/category.schema";
-import upload from "../middlewares/upload.middleware";
 
 const router = Router();
 
-// router.put(
-//     "/:id",
-//     validateRequest(updateCategorySchema),
-//     authenticateUser,
-//     authorizeRoles("admin"),
-//     categoryController.updateCategory
-// );
-router.delete(
-    "/:id",
-    authenticateUser,
-    authorizeRoles("admin"),
-    categoryController.deleteCategory
-);
-
+// Admin routes
 router.post(
     "/",
     authenticateUser,
     authorizeRoles("admin"),
-    upload.single("image"),
     validateRequest(createCategorySchema),
-    categoryController.createCategory
+    CategoryController.createCategory
 );
-router.get("/", categoryController.getAllCategories);
-router.get("/:id", categoryController.getCategoryById);
+router.put(
+    "/:id",
+    authenticateUser,
+    authorizeRoles("admin"),
+    validateRequest(updateCategorySchema),
+    CategoryController.updateCategory
+);
+router.delete(
+    "/:id",
+    authenticateUser,
+    authorizeRoles("admin"),
+    CategoryController.deleteCategory
+);
+
+// Public routes
+router.get("/", CategoryController.getAllCategories);
+router.get("/:id/products", CategoryController.getCategoryProducts);
 
 export default router;

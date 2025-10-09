@@ -1,66 +1,32 @@
-import { Schema, model, Document, Types } from "mongoose";
+import { Schema, model, Types, Document } from "mongoose";
 
 export interface ICategory extends Document {
-    _id: Types.ObjectId;
     title: string;
-    description: string;
+    description?: string;
     image?: string;
     imagePublicId?: string;
     subCategories: Types.ObjectId[];
     products: Types.ObjectId[];
-    isBanner: boolean;
+    isBanner?: boolean;
+    slug: string;
+    parentId?: Types.ObjectId | null;
+    createdAt?: Date;
+    updatedAt?: Date;
 }
 
-const categorySchema = new Schema<ICategory>(
+const CategorySchema = new Schema<ICategory>(
     {
-        title: {
-            type: String,
-            required: true,
-        },
-        description: {
-            type: String,
-            required: true,
-        },
-        image: {
-            type: String,
-            default: null,
-        },
-        imagePublicId: {
-            type: String,
-            default: null,
-        },
-        isBanner: {
-            type: Boolean,
-            default: false,
-        },
-        subCategories: [
-            {
-                type: Schema.Types.ObjectId,
-                ref: "SubCategory",
-                default: [],
-                required: false,
-            },
-        ],
-        products: [
-            {
-                type: Schema.Types.ObjectId,
-                ref: "Product",
-                default: [],
-                required: false,
-            },
-        ],
+        title: { type: String, required: true, index: true },
+        description: { type: String },
+        image: { type: String },
+        imagePublicId: { type: String },
+        subCategories: [{ type: Types.ObjectId, ref: "SubCategory" }],
+        products: [{ type: Types.ObjectId, ref: "Product" }],
+        isBanner: { type: Boolean, default: false },
+        slug: { type: String, required: true, unique: true, index: true },
+        parentId: { type: Types.ObjectId, ref: "Category", default: null },
     },
-    {
-        timestamps: true,
-    }
+    { timestamps: true }
 );
 
-categorySchema.methods.toJSON = function () {
-    const category = this.toObject();
-    delete category.createdAt;
-    delete category.updatedAt;
-    delete category.__v;
-    return category;
-};
-
-export default model<ICategory>("Category", categorySchema);
+export const Category = model<ICategory>("Category", CategorySchema);

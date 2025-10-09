@@ -1,50 +1,36 @@
-import { z } from "zod";
+import z from "zod";
 
-export const createProductSchema = z
-    .object({
-        title: z
-            .string()
-            .min(3, "Title must be at least 3 characters long.")
-            .max(100, "Title must be at most 100 characters long."),
+const objectId = z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid ObjectId");
 
-        description: z
-            .string()
-            .min(10, "Description must be at least 10 characters long.")
-            .max(2000, "Description must be at most 2000 characters long."),
+const baseProductSchema = z.object({
+    title: z.string(),
+    description: z.string().optional(),
+    status: z.enum(["active", "draft", "archived"]).optional(),
+    images: z.array(z.string()).optional(),
+    imagePublicIds: z.array(z.string()).optional(),
+    price: z.coerce.number(),
+    compareAtPrice: z.coerce.number().optional(),
+    isTaxable: z.boolean().optional(),
+    purchaseCost: z.coerce.number().optional(),
+    barcode: z.string().optional(),
+    weight: z.coerce.number().optional(),
+    weightUnit: z.string().optional(),
+    stock: z.coerce.number().optional(),
+    isStockTrackable: z.boolean().optional(),
+    isOnSale: z.boolean().optional(),
+    brand: z.string().optional(),
+    colors: z.array(z.string()).optional(),
+    sizes: z.array(z.string()).optional(),
+    inStock: z.boolean().optional(),
+    tags: z.array(z.string()).optional(),
+    categoryId: objectId.optional(),
+    subcategoryId: objectId.optional(),
+});
 
-        status: z.enum(["active", "draft", "archived"]).default("draft"),
+export const createProductSchema = z.object({
+    body: baseProductSchema,
+});
 
-        price: z
-            .number("Price is required.")
-            .positive("Price must be greater than 0."),
-
-        compareAtPrice: z
-            .number("Price is required.")
-            .positive("Compare at price must be greater than 0."),
-
-        isTaxable: z.boolean().default(false),
-
-        purchaseCost: z
-            .number()
-            .nonnegative("Purchase cost must be 0 or greater.")
-            .optional(),
-
-        weight: z
-            .number()
-            .positive("Weight must be greater than 0.")
-            .optional(),
-
-        weightUnit: z.enum(["lb", "kg", "oz", "g"]).optional(),
-
-        // If you add variants later
-        // variants: z.array(z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid ObjectId")).optional()
-    })
-    .refine(
-        (data) => !data.compareAtPrice || data.compareAtPrice >= data.price,
-        {
-            message: "Compare at price must be greater than or equal to price.",
-            path: ["compareAtPrice"],
-        }
-    );
-
-export const updateProductSchema = createProductSchema.partial();
+export const updateProductSchema = z.object({
+    body: baseProductSchema.partial(),
+});

@@ -3,7 +3,7 @@ import Order from "../models/order.model";
 import { handle } from "../middlewares/requestHandler";
 
 export const createOrder = handle(async (req: Request, res: Response) => {
-    const userId = req.user.id; // from auth middleware
+    const userId = req.user?.id; // from auth middleware
     const { cart } = req.body; // cart = [{ productId, quantity, price }]
 
     const totalAmount = cart.reduce(

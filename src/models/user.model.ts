@@ -1,10 +1,13 @@
 import { Schema, model, Document, Types } from "mongoose";
 
+export type IRole = "ADMIN" | "USER";
+
 export interface IUser extends Document {
     email: string;
     password: string;
     name: string;
-    role: "admin" | "user";
+    role: IRole;
+    refreshToken?: string | null;
     wishlist: Types.ObjectId[];
 }
 
@@ -14,10 +17,13 @@ const userSchema = new Schema<IUser>(
             type: String,
             required: true,
             unique: true,
+            lowercase: true,
+            trim: true,
         },
         name: {
             type: String,
             required: true,
+            trim: true,
         },
         password: {
             type: String,
@@ -25,8 +31,12 @@ const userSchema = new Schema<IUser>(
         },
         role: {
             type: String,
-            enum: ["admin", "user"],
-            default: "user",
+            enum: ["ADMIN", "USER"],
+            default: "USER",
+        },
+        refreshToken: {
+            type: String,
+            default: null,
         },
         wishlist: [
             {
@@ -47,9 +57,10 @@ userSchema.methods.toJSON = function () {
     delete user.password;
     delete user.createdAt;
     delete user.updatedAt;
+    delete user.refreshToken;
     delete user.role;
     delete user.__v;
     return user;
 };
 
-export default model<IUser>("User", userSchema);
+export const User = model<IUser>("User", userSchema);

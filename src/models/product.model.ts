@@ -1,14 +1,13 @@
-import { Schema, model, Document, Types } from "mongoose";
+import { Schema, model, Types, Document } from "mongoose";
 
 export interface IProduct extends Document {
-    _id: Types.ObjectId;
     title: string;
-    description: string;
+    description?: string;
     status: "active" | "draft" | "archived";
     images: string[];
     imagePublicIds: string[];
     price: number;
-    compareAtPrice: number;
+    compareAtPrice?: number;
     isTaxable: boolean;
     purchaseCost?: number;
     barcode?: string;
@@ -17,95 +16,57 @@ export interface IProduct extends Document {
     stock: number;
     isStockTrackable: boolean;
     isOnSale: boolean;
-
-    // variants?: Types.ObjectId[];
+    brand?: string;
+    colors?: string[];
+    sizes?: string[];
+    inStock?: boolean;
+    tags?: string[];
+    categoryId?: Types.ObjectId;
+    subcategoryId?: Types.ObjectId;
+    createdAt?: Date;
+    updatedAt?: Date;
 }
 
-const productSchema = new Schema<IProduct>(
+const ProductSchema = new Schema<IProduct>(
     {
-        title: {
-            type: String,
-            required: true,
-        },
-        description: {
-            type: String,
-            required: true,
-        },
+        title: { type: String, required: true, index: true },
+        description: { type: String },
         status: {
             type: String,
             enum: ["active", "draft", "archived"],
-            default: "draft",
+            default: "active",
+            index: true,
         },
-        images: {
-            type: [String],
-            default: [],
+        images: [{ type: String }],
+        imagePublicIds: [{ type: String }],
+        price: { type: Number, required: true, index: true },
+        compareAtPrice: { type: Number },
+        isTaxable: { type: Boolean, default: true },
+        purchaseCost: { type: Number },
+        barcode: { type: String, index: true },
+        weight: { type: Number },
+        weightUnit: { type: String },
+        stock: { type: Number, default: 0 },
+        isStockTrackable: { type: Boolean, default: true },
+        isOnSale: { type: Boolean, default: false, index: true },
+
+        brand: { type: String, index: true },
+        colors: [{ type: String, index: true }],
+        sizes: [{ type: String }],
+        inStock: { type: Boolean, default: true, index: true },
+        tags: [{ type: String, index: true }],
+
+        categoryId: { type: Types.ObjectId, ref: "Category", index: true },
+        subcategoryId: {
+            type: Types.ObjectId,
+            ref: "SubCategory",
+            index: true,
         },
-        imagePublicIds: {
-            type: [String],
-            default: [],
-        },
-        price: {
-            type: Number,
-            required: true,
-        },
-        compareAtPrice: {
-            type: Number,
-            required: true,
-        },
-        isTaxable: {
-            type: Boolean,
-            default: false,
-        },
-        purchaseCost: {
-            type: Number,
-            required: false,
-        },
-        barcode: {
-            type: String,
-            required: false,
-        },
-        weight: {
-            type: Number,
-            required: false,
-        },
-        weightUnit: {
-            type: String,
-            enum: ["lb", "kg", "oz", "g"],
-        },
-        stock: {
-            type: Number,
-            required: false,
-            default: 0,
-        },
-        isStockTrackable: {
-            type: Boolean,
-            required: false,
-            default: true,
-        },
-        isOnSale: {
-            type: Boolean,
-            required: false,
-            default: false,
-        },
-        // variants: [
-        //     {
-        //         type: [Schema.Types.ObjectId],
-        //         ref: "Variant",
-        //         default: [],
-        //     },
-        // ],
     },
-    {
-        timestamps: true,
-    }
+    { timestamps: true }
 );
 
-productSchema.methods.toJSON = function () {
-    const product = this.toObject();
-    delete product.createdAt;
-    delete product.updatedAt;
-    delete product.__v;
-    return product;
-};
+ProductSchema.index({ categoryId: 1, subcategoryId: 1, price: 1 });
+ProductSchema.index({ brand: 1, price: 1 });
 
-export default model<IProduct>("Product", productSchema);
+export const Product = model<IProduct>("Product", ProductSchema);

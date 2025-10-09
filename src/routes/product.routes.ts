@@ -4,7 +4,10 @@ import {
     authenticateUser,
     authorizeRoles,
 } from "../middlewares/auth.middleware";
-import { createProductSchema } from "../schemas/product.schema";
+import {
+    createProductSchema,
+    updateProductSchema,
+} from "../schemas/product.schema";
 import { validateRequest } from "../middlewares/validateRequest";
 
 const router = Router();
@@ -21,8 +24,10 @@ router.put(
     "/:id",
     authenticateUser,
     authorizeRoles("admin"),
+    validateRequest(updateProductSchema),
     ProductController.updateProduct
 );
+
 router.delete(
     "/:id",
     authenticateUser,

@@ -1,8 +1,8 @@
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 import Cart from "../models/cart.model";
-import Product from "../models/product.model";
+import { Product } from "../models/product.model";
 
-export const getCart = async (id: string) => {
+export const getCart = async (id: Types.ObjectId) => {
     let cart = await Cart.findOne({ user: id });
     if (!cart) {
         cart = new Cart({
@@ -18,7 +18,7 @@ export const getCart = async (id: string) => {
 export const addToCart = async (
     productId: string,
     quantity: number,
-    userId: string
+    userId: Types.ObjectId
 ) => {
     const product = await Product.findById(productId);
 
@@ -88,7 +88,7 @@ export const addToCart = async (
 
 export const removeProductFromCart = async (
     productId: string,
-    userId: string
+    userId: Types.ObjectId
 ) => {
     const cart = await Cart.findOne({ user: userId });
     if (!cart) {
